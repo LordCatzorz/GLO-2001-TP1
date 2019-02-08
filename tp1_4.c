@@ -37,18 +37,25 @@ void InitialiseParam(Parametres *param, int num, int start, int end)
 	param->produit = 1;
 }
 
-int main(int argc, char *argv[]) 
-{ 
-	const int factorialToCalculate = 15;
+void PrintFactorial(int factorialToCalculate)
+{
 	printf("Calcul du factorielle de %d\n", factorialToCalculate);
 
 	pthread_t threads[NUMBER_OF_THREADS];
 	Parametres mesParametres[NUMBER_OF_THREADS];
 	
-	InitialiseParam(&mesParametres[0], 1, 1, 3);
-	InitialiseParam(&mesParametres[1], 2, 4, 6);
-	InitialiseParam(&mesParametres[2], 3, 7, 9);
-	InitialiseParam(&mesParametres[3], 4, 10, 15);
+	int startValue = 1;
+	int endValue = 1;
+	int step = factorialToCalculate / NUMBER_OF_THREADS;
+
+	for (int i = 0; i < NUMBER_OF_THREADS -1; i++)
+	{
+		endValue = startValue + step - 1;
+		InitialiseParam(&mesParametres[i], i + 1, startValue, endValue);
+		startValue = endValue + 1;
+	}
+	//Forcer le dernier thread a prendre les cas restants.
+	InitialiseParam(&mesParametres[NUMBER_OF_THREADS - 1], NUMBER_OF_THREADS, startValue, factorialToCalculate);
 	
 	for(int i = 0; i < NUMBER_OF_THREADS; i++)
 	{
@@ -70,5 +77,14 @@ int main(int argc, char *argv[])
 	fact *= mesParametres[3].produit;
 
 	printf("Main(): La factorielle de %d est %llu\n", factorialToCalculate, fact);
+}
+
+int main(int argc, char *argv[]) 
+{ 
+	const int factorialToCalculate = 15;
+	//for(int zzz=0; zzz<50000;zzz++)
+	//{
+		PrintFactorial(factorialToCalculate);
+	//}
 	return 0;
 }
